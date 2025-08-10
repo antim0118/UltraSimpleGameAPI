@@ -1,2 +1,3 @@
----@alias UIGame { path:string, gameName: string, icon: ImageInstance }
----@alias UIGameMeta { category?: "Classic", altName?: string }
+---@alias UIGame { path:string, name: string, icon: string }
+---@alias UIGameCategory { name: string, games: UIGame[] }
+---@alias UIGameMeta { category?: UIGameCategoryNames, altName?: string, author?: string }

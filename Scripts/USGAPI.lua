@@ -10,6 +10,8 @@
 if (_USGAPI_CACHE) then return _USGAPI_CACHE; end;
 
 --#region CONSTANTS
+local API_VERSION = "1.0.0";
+
 local FONT_DEFAULT_SIZE = 16;
 --#endregion
 
@@ -30,7 +32,7 @@ local _screenFlip = screen.flip;
 
 ---@param color? ColorInstance
 local startFrame = function(color)
-    LUA.print(200, 10, sf("%.2fMb", LUA.getRAM() / 1024 / 1024));
+    LUA.print(210, 5, sf("%.2fMb", LUA.getRAM() / 1024 / 1024));
     _screenFlip();
     if (color) then
         _screenClear(color);
@@ -150,6 +152,7 @@ local drawLine = function(x1, y1, x2, y2, color, useCameraPos)
         x2, y2 = x2 - cameraX, y2 - cameraY;
     end;
     _drawLine(x1, y1, x2, y2, color);
+    _drawCalls = _drawCalls + 1;
 end;
 
 ---@param x number
@@ -162,6 +165,7 @@ local drawCircle = function(x, y, radius, color, useCameraPos)
         x, y = x - cameraX, y - cameraY;
     end;
     _drawCircle(x, y, radius, color);
+    _drawCalls = _drawCalls + 1;
 end;
 
 ---@param x number
@@ -180,6 +184,7 @@ local drawRect = function(x, y, width, height, color, useCameraPos)
     _drawLine(x, y, x, y2, color);
     _drawLine(x2, y2, x2, y, color);
     _drawLine(x2, y2, x, y2, color);
+    _drawCalls = _drawCalls + 4;
 end;
 
 ---отрисовка прямоугольника
@@ -194,11 +199,12 @@ local fillRect = function(x, y, width, height, color, useCameraPos)
         x, y = x - cameraX, y - cameraY;
     end;
     _fillRect(x, y, width, height, color);
+    _drawCalls = _drawCalls + 1;
 end;
 --#endregion
 
 --#region Fonts
----@type table<string, { data: intraFontInstance, w: table<string, integer> }>
+---@type table<string, intraFontInstance>
 local _drawTextCache = {};
 
 local _fontLoad = intraFont.load;
@@ -215,11 +221,7 @@ local _fontWidth = intraFont.textW; --некорректно работает и
 local drawText = function(fontPath, x, y, text, color, fontScale, useCameraPos)
     local font = _drawTextCache[fontPath];
     if (not font) then
-        local data = _fontLoad(fontPath, FONT_DEFAULT_SIZE);
-        font = {
-            data = data,
-            w = {}
-        };
+        font = _fontLoad(fontPath, FONT_DEFAULT_SIZE);
         _drawTextCache[fontPath] = font;
     end;
 
@@ -229,7 +231,13 @@ local drawText = function(fontPath, x, y, text, color, fontScale, useCameraPos)
         x, y = x - cameraX, y - cameraY;
     end;
 
-    _fontPrint(x, y, text, color, font.data, fontScale);
+    --dont render outside of screen
+    if (x + 480 < 0 or x > 480
+            or y + FONT_DEFAULT_SIZE < 0 or y > 272) then
+        return;
+    end;
+
+    _fontPrint(x, y, text, color, font, fontScale);
     _drawCalls = _drawCalls + 1;
 end;
 
@@ -347,6 +355,15 @@ local getGamePath = function()
     local info = debug.getinfo(2, "S");
     return info.short_src:match("^(.*/)[^/]*$");
 end;
+
+local isEmulator = function()
+    return System.getNickname() == "PPSSPP";
+end;
+
+---@return string version major.minor.patch
+local getAPIVersion = function()
+    return API_VERSION;
+end;
 --#endregion
 
 --#region Debug
@@ -438,6 +455,8 @@ _USGAPI_CACHE = {
     stopSound = stopSound,
 
     getGamePath = getGamePath,
+    isEmulator = isEmulator,
+    getAPIVersion = getAPIVersion,
 
     debugGetTextureSizes = debugGetTextureSizes,
     debugGetDrawCalls = debugGetDrawCalls,

@@ -1,4 +1,5 @@
 require('Utils.Load');
+require('Scripts.DebugTimers');
 require('Scripts.Tasks');
 local USGAPI = require('Scripts.USGAPI');
 local UI = require('Scripts.UI');
