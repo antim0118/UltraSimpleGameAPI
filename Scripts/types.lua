@@ -1,0 +1,2 @@
+---@alias UIGame { path:string, gameName: string, icon: ImageInstance }
+---@alias UIGameMeta { category?: "Classic", altName?: string }
