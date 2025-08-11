@@ -75,7 +75,7 @@ end;
 
 ## Как работать с нейронкой
 
-Кидаете в нейронку файл [LLM_Prompt_USGAPI_RU.txt](https://raw.githubusercontent.com/antim0118/UltraSimpleGameAPI/refs/heads/master/LLM_Prompt_USGAPI_RU.txt) (где-то можно прям ссылку указать) и пишете ей что-то по типу:
+Кидаете в нейронку файл [LLM_Prompt_USGAPI_RU.txt](https://raw.githubusercontent.com/antim0118/UltraSimpleGameAPI/refs/heads/main/LLM_Prompt_USGAPI_RU.txt) (где-то можно прям ссылку указать) и пишете ей что-то по типу:
 
 `Сделай игру minecraft` или `Сделай крутую игру чтобы бегать можно было и взрывы всякие и вообще всё клёво`
 
