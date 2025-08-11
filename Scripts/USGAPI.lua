@@ -120,6 +120,44 @@ end;
 ---@param texturePath string Path to texture
 ---@param x number
 ---@param y number
+---@param w number
+---@param h number
+---@param angle? number Rotation (0-360)
+---@param alpha? number Alpha (0-255)
+---@param color? ColorInstance
+local drawTextureSized = function(texturePath, x, y, w, h, angle, alpha, color)
+    local tex = _drawTextureCache[texturePath];
+    if (not tex) then tex = loadTexture(texturePath); end;
+
+    x, y = x - cameraX, y - cameraY;
+
+    --dont render outside of screen
+    if (not angle or angle == 0) then
+        if (x + w < 0 or x > 480
+                or y + h < 0 or y > 272) then
+            return;
+        end;
+    else
+        local ww, hh = w * 3 / 2, h * 3 / 2;
+        if (x + ww < 0 or x - ww > 480
+                or y + hh < 0 or y - hh > 272) then
+            return;
+        end;
+    end;
+
+    if (not angle and not alpha) then
+        _texDraw(tex.data, x, y, w, h, color);
+    else
+        angle = angle or 0;
+        alpha = alpha or 255;
+        _texDraw(tex.data, x, y, w, h, color, 0, 0, tex.w, tex.h, angle, alpha);
+    end;
+    _drawCalls = _drawCalls + 1;
+end;
+
+---@param texturePath string Path to texture
+---@param x number
+---@param y number
 ---@param angle? number Rotation (0-360)
 ---@param alpha? number Alpha (0-255)
 ---@param color? ColorInstance
@@ -440,6 +478,7 @@ _USGAPI_CACHE = {
     getCameraPos = getCameraPos,
 
     drawTexture = drawTexture,
+    drawTextureSized = drawTextureSized,
     drawUITexture = drawUITexture,
     drawLine = drawLine,
     drawCircle = drawCircle,
