@@ -57,13 +57,27 @@ end;
 --#endregion
 
 --#region Rendering (draw)
-local _texDraw = Image.draweasy;
+local _texDrawEasy, _texDraw = Image.draweasy, Image.draw;
 local _texLoad = Image.load;
 
 ---@alias USGAPITexture { data: ImageInstance, w: number, h: number, size: number }
 
 ---@type table<string, USGAPITexture>
 local _drawTextureCache = {};
+
+---@param texturePath string Path to texture
+local loadTexture = function(texturePath)
+    local data = _texLoad(texturePath);
+    local w, h = Image.W(data), Image.H(data);
+    local tex = {
+        data = data,
+        w = w,
+        h = h,
+        size = w * h * 4
+    };
+    _drawTextureCache[texturePath] = tex;
+    return tex;
+end;
 
 ---@param texturePath string Path to texture
 ---@param x number
@@ -73,17 +87,7 @@ local _drawTextureCache = {};
 ---@param color? ColorInstance
 local drawTexture = function(texturePath, x, y, angle, alpha, color)
     local tex = _drawTextureCache[texturePath];
-    if (not tex) then
-        local data = _texLoad(texturePath);
-        local w, h = Image.W(data), Image.H(data);
-        tex = {
-            data = data,
-            w = w,
-            h = h,
-            size = w * h * 4
-        };
-        _drawTextureCache[texturePath] = tex;
-    end;
+    if (not tex) then tex = loadTexture(texturePath); end;
 
     x, y = x - cameraX, y - cameraY;
 
@@ -102,10 +106,14 @@ local drawTexture = function(texturePath, x, y, angle, alpha, color)
         end;
     end;
 
-    angle = angle or 0;
-    alpha = alpha or 255;
+    if (not angle and not alpha) then
+        _texDrawEasy(tex.data, x, y, color);
+    else
+        angle = angle or 0;
+        alpha = alpha or 255;
+        _texDrawEasy(tex.data, x, y, color, angle, alpha);
+    end;
 
-    _texDraw(tex.data, x, y, color, angle, alpha);
     _drawCalls = _drawCalls + 1;
 end;
 
@@ -117,22 +125,12 @@ end;
 ---@param color? ColorInstance
 local drawUITexture = function(texturePath, x, y, angle, alpha, color)
     local tex = _drawTextureCache[texturePath];
-    if (not tex) then
-        local data = _texLoad(texturePath);
-        local w, h = Image.W(data), Image.H(data);
-        tex = {
-            data = data,
-            w = w,
-            h = h,
-            size = w * h * 4
-        };
-        _drawTextureCache[texturePath] = tex;
-    end;
+    if (not tex) then tex = loadTexture(texturePath); end;
 
     angle = angle or 0;
     alpha = alpha or 255;
 
-    _texDraw(tex.data, x, y, color, angle, alpha);
+    _texDrawEasy(tex.data, x, y, color, angle, alpha);
     _drawCalls = _drawCalls + 1;
 end;
 
