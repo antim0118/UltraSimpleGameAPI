@@ -1,7 +1,7 @@
 --[[
 
-    ___ USGAPI v1.0 by antim ___
-    ________ 09.08.2025 ________
+    ___ USGAPI v1.0.1 by antim ___
+    _________ 12.08.2025 _________
     https://github.com/antim0118
     https://t.me/atgamedev
 
@@ -10,7 +10,7 @@
 if (_USGAPI_CACHE) then return _USGAPI_CACHE; end;
 
 --#region CONSTANTS
-local API_VERSION = "1.0.0";
+local API_VERSION = "1.0.1";
 
 local FONT_DEFAULT_SIZE = 16;
 --#endregion
