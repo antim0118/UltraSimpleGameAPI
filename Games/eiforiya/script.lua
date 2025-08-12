@@ -437,6 +437,10 @@ while true do
         state.index = 1; node = scenes[state.index];
     end;
 
+    if (LUA.getRAM() < 10485760) then --10mb
+        USGAPI.unloadAllTextures();
+    end;
+
     -- Apply per-scene BGM if specified
     if node.bgm ~= nil then setBGM(node.bgm, 80); end;
 
@@ -460,9 +464,6 @@ while true do
         drawCG(node.cg);
         if buttons.pressed(buttons.cross) or buttons.pressed(buttons.circle) then
             USGAPI.playSound(S.advance, 25);
-            if (LUA.getRAM() < 15728640) then --15mb
-                USGAPI.unloadAllTextures();
-            end;
             if node.nextIndex and scenes[node.nextIndex] then
                 state.index = node.nextIndex;
             else
