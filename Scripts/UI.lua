@@ -30,6 +30,7 @@ local startGame = function(path)
     USGAPI.unloadAll();
     dofile(table.concat({ 'Games', path, 'script.lua' }, '/'));
     USGAPI.unloadAll();
+    System.GC();
     USGAPI.setCameraPos(0, 0);
 end;
 
