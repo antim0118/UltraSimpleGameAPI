@@ -1,4 +1,5 @@
 ---@type UIGameMeta
 return {
-    category = "Parody"
+    category = "Parody",
+    createdWithAI = true
 };

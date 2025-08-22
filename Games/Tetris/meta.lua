@@ -1,4 +1,5 @@
 ---@type UIGameMeta
 return {
-    category = "Classic"
+    category = "Classic",
+    createdWithAI = true
 };
