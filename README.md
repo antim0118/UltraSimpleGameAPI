@@ -6,7 +6,7 @@
 
 ## Как установить на PSP (чтобы поиграть в игры)
 
-1. [Скачайте актуальную версию](https://github.com/antim0118/UltraSimpleGameAPI/archive/refs/heads/main.zip).
+1. Скачайте архив: [Стабильная версия](https://github.com/antim0118/UltraSimpleGameAPI/releases) / [Предрелизная версия (с последними изменениями)](https://github.com/antim0118/UltraSimpleGameAPI/archive/refs/heads/main.zip).
 2. Папку внутри архива поместите по пути _X:/PSP/GAME/_.
 3. В списке игр найдите USGAPI и запустите.
 
