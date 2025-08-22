@@ -108,12 +108,15 @@ local drawXMB = function()
 end;
 
 local drawGames = function()
-    -- LUA.print(10, 10,
-    --     string.format("cat:%.2f  game:%.2f\nsinner:%d", selectedCategoryX, selectedGame, abs(gameWhiteBgSinner - 255)));
-    for ci, category in ipairs(gameCategories) do
+    for ci = 1, #groupedGames do
+        local category = groupedGames[ci];
+
         local cx, cy = 20 + ci * CATEGORIES_X_GAP - selectedCategoryX, 60;
         if (ci == selectedCategory) then
-            for gi, game in ipairs(category.games) do
+            local games = category.games;
+            for gi = 1, #games do
+                local game = games[gi];
+
                 local gx = 20 + ci * CATEGORIES_X_GAP - selectedCategoryX;
                 local gy = 100 + gi * GAMES_Y_GAP - selectedGameY;
 

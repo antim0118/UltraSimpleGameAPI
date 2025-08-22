@@ -1,6 +1,6 @@
 local sf = string.format;
 local tostring = tostring;
-local pairs, ipairs = pairs, ipairs;
+local pairs = pairs;
 
 ---@param tb table
 ---@param element any
