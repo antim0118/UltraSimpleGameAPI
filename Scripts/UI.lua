@@ -22,7 +22,27 @@ local selectedCategory, selectedGame = 1, 1;
 local selectedCategoryX, selectedGameY = CATEGORIES_X_GAP, GAMES_Y_GAP;
 local gameWhiteBgSinner = 0;
 
-local gameCategories = GameList.getGameCategories();
+local currentGroup = "category";
+local groupGames = { "category", "author", "createdWithAI" };
+local groupedGames = GameList.getGroupedGamesBy(currentGroup);
+
+local swapGroup = function()
+    local groupIndex = -1;
+    for i = 1, #groupGames do
+        if (currentGroup == groupGames[i]) then
+            groupIndex = i;
+        end;
+    end;
+
+    if (groupIndex ~= -1) then
+        groupIndex = groupIndex + 1;
+        if (groupIndex > #groupGames) then groupIndex = 1; end;
+        currentGroup = groupGames[groupIndex];
+        groupedGames = GameList.getGroupedGamesBy(currentGroup);
+        selectedCategory, selectedGame = 1, 1;
+        selectedCategoryX, selectedGameY = CATEGORIES_X_GAP, GAMES_Y_GAP;
+    end;
+end;
 
 ---@param path string путь до папки с игрой
 local startGame = function(path)
@@ -49,7 +69,7 @@ local update = function()
     if (buttonsPressed(16) or (upHeld and holdTimer > 30)) then       --up
         selectedGame = max(1, selectedGame - 1);
     elseif (buttonsPressed(64) or (downHeld and holdTimer > 30)) then --down
-        selectedGame = min(#gameCategories[selectedCategory].games, selectedGame + 1);
+        selectedGame = min(#groupedGames[selectedCategory].games, selectedGame + 1);
     end;
 
     if (holdTimer > 30) then
@@ -57,7 +77,7 @@ local update = function()
     end;
 
     if (buttonsPressed(32)) then --right
-        selectedCategory = min(#gameCategories, selectedCategory + 1);
+        selectedCategory = min(#groupedGames, selectedCategory + 1);
         selectedGame = 1;
         selectedGameY = GAMES_Y_GAP;
     elseif (buttonsPressed(128)) then --left
@@ -83,7 +103,11 @@ local update = function()
     if (gameWhiteBgSinner > 255 * 2) then gameWhiteBgSinner = 0; end;
 
     if (buttonsPressed(16384)) then --cross
-        startGame(gameCategories[selectedCategory].games[selectedGame].path);
+        startGame(groupedGames[selectedCategory].games[selectedGame].path);
+    end;
+
+    if (buttonsPressed(4096)) then --triangle
+        swapGroup();
     end;
 end;
 
@@ -104,7 +128,8 @@ local drawXMB = function()
 
     drawText(fontName, 6, 6, TITLE, black);
     drawText(fontName, 4, 4, TITLE);
-    -- drawText("Fonts/arial.ttf", 10, 10, tostring(System.getBatteryPercent()));
+
+    drawTexture("Images/xmb_group.png", 420, 256);
 end;
 
 local drawGames = function()
@@ -144,14 +169,6 @@ local drawGames = function()
             end;
             drawText(fontName, cx, cy, category.name, gray);
         end;
-
-        -- local x = 10;
-        -- local y = 100 + 16 * i - selectedGame * 5;
-        -- if (i == selectedGame) then
-        --     drawText(fontName, x, y, '> ' .. drawInfo.gameName .. ' <', nil, drawInfo.scale);
-        -- else
-        --     drawText(fontName, x, y, drawInfo.gameName, gray, drawInfo.scale);
-        -- end;
     end;
 end;
 

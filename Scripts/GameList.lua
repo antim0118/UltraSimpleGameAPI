@@ -2,14 +2,6 @@ local gamesList = File.GetDirectories('Games');
 
 local DEFAULT_ICON = 'Images/ICON0.png';
 
----@alias UIGameCategoryNames "Classic" | "Parody" | "Unknown"
----@type UIGameCategoryNames[]
-local DEFAULT_CATEGORIES = {
-    'Classic',
-    'Parody',
-    'Unknown'
-};
-
 ---@param gamePath string
 ---@return UIGameMeta
 local getMetaByGame = function(gamePath)
@@ -28,15 +20,20 @@ local getIconByGame = function(gamePath)
     return path;
 end;
 
----@type UIGameCategory[]
-local gameCategories = (function()
-    ---@type UIGameCategory[]
-    local tb = {};
+---@param groupBy "category"|"author"|"createdWithAI"
+---@return UIGameGroup[]
+local getGroupedGamesBy = function(groupBy)
+    ---@type table<string, UIGame[]>
+    local groups = {};
 
-    for i, categoryName in ipairs(DEFAULT_CATEGORIES) do
-        ---@type UIGameCategory
-        local category = { name = categoryName, games = {} };
-        table.insert(tb, category);
+    ---@param groupValue string
+    ---@param game UIGame
+    local appendGame = function(groupValue, game)
+        --find group by name
+        if (not groups[groupValue]) then
+            groups[groupValue] = {};
+        end;
+        table.insert(groups[groupValue], game);
     end;
 
     for i, gamePath in ipairs(gamesList) do
@@ -45,30 +42,34 @@ local gameCategories = (function()
         if (meta.author) then
             gameName = gameName .. string.format(' (by %s)', meta.author);
         end;
+
         ---@type UIGame
         local game = { path = gamePath, name = gameName, icon = getIconByGame(gamePath) };
+        local groupValue = meta[groupBy] or 'Unknown';
 
-        local categoryName = meta.category or 'Unknown';
-
-        --find category by name
-        ---@type UIGameCategory | nil
-        local category = nil;
-        for i, cat in ipairs(tb) do
-            if (cat.name == categoryName) then
-                category = cat;
-                break;
-            end;
+        if (type(groupValue) == "boolean" and groupValue) then
+            groupValue = groupBy;
         end;
 
-        if (not category) then
-            error(string.format("Unknown category found: %s", tostring(categoryName)));
-        end;
-
-        table.insert(category.games, game);
+        appendGame(groupValue, game);
     end;
+
+    ---@type UIGameGroup[]
+    local tb = {};
+
+    for groupValue, games in pairs(groups) do
+        tb[#tb + 1] = { name = groupValue, games = games };
+    end;
+
+    table.sort(tb, function(a, b)
+        local an, bn = a.name:upper(), b.name:upper();
+        if (a.name == "Unknown") then return false; end;
+        return an < bn;
+    end);
+
     return tb;
-end)();
+end;
 
 return {
-    getGameCategories = function() return gameCategories; end
+    getGroupedGamesBy = getGroupedGamesBy
 };
