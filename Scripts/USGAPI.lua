@@ -69,9 +69,12 @@ local _texLoad = Image.load;
 local _drawTextureCache = {};
 
 ---@param texturePath string Path to texture
+---@return USGAPITexture
+---@nodiscard
 local loadTexture = function(texturePath)
     local data = _texLoad(texturePath);
     local w, h = Image.W(data), Image.H(data);
+    ---@type USGAPITexture
     local tex = {
         data = data,
         w = w,
