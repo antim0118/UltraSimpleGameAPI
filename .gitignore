@@ -2,3 +2,6 @@
 *.psd
 error_log.txt
 save.dat
+
+Scripts/USGAPI_TODO.lua
+Scripts/USGAPIExperimental.lua
