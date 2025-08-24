@@ -15,7 +15,10 @@ local API_VERSION = "1.1.0";
 local FONT_DEFAULT_SIZE = 16;
 --#endregion
 
+--#region SHORTINGS
 local sf = string.format;
+local floor = math.floor;
+--#endregion
 
 local _drawCalls = 0;
 
@@ -32,7 +35,7 @@ local _screenFlip = screen.flip;
 
 ---@param color? ColorInstance
 local startFrame = function(color)
-    LUA.print(210, 5, sf("%.2fMb", LUA.getRAM() / 1024 / 1024));
+    LUA.print(180, 2, sf("FPS: %d / %.2fMb", LUA.getFPS(), LUA.getRAM() / 1024 / 1024));
     _screenFlip();
     if (color) then
         _screenClear(color);
@@ -236,6 +239,139 @@ local fillRect = function(x, y, width, height, color, useCameraPos)
     end;
     _fillRect(x, y, width, height, color);
     _drawCalls = _drawCalls + 1;
+end;
+--#endregion
+
+--#region Tiles
+
+---@alias USGAPITile { tex:ImageInstance, srcX:integer, srcY:integer, srcW: integer, srcH: integer, x: integer, y: integer, w: integer, h: integer }
+---@alias USGAPITileChunks table<integer, table<integer, USGAPITile[]>> [cameraX/gap][cameraY/gap][]
+
+---@type USGAPITile[]
+local _drawTileCache = {};
+local _drawTileCacheCount = 0;
+
+---@type USGAPITileChunks [cameraX/gap][cameraY/gap][]
+local _drawTileCacheChunks = {};
+local _drawTileCacheChunksGap = 1;
+
+---@param texturePath string
+---@param srcX integer
+---@param srcY integer
+---@param srcW integer
+---@param srcH integer
+---@param targetX integer
+---@param targetY integer
+---@param targetW? integer
+---@param targetH? integer
+local addTile = function(texturePath, srcX, srcY, srcW, srcH, targetX, targetY, targetW, targetH)
+    local tex = _drawTextureCache[texturePath];
+    if (not tex) then tex = loadTexture(texturePath); end;
+
+    ---@type USGAPITile
+    local newTile = {
+        tex = tex.data,
+        srcX = srcX,
+        srcY = srcY,
+        srcW = srcW,
+        srcH = srcH,
+        x = targetX,
+        y = targetY,
+        w = targetW or srcW,
+        h = targetH or srcH
+    };
+
+    -- check if it was already added
+    for i = 1, _drawTileCacheCount do
+        local tile = _drawTileCache[i];
+        if (tile.tex == tex
+                and tile.srcX == srcX and tile.srcY == srcY
+                and tile.srcW == srcW and tile.srcH == srcH
+                and tile.x == targetX and tile.y == targetY
+                and tile.w == newTile.w and tile.h == newTile.h) then
+            return;
+        end;
+    end;
+
+    _drawTileCache[#_drawTileCache + 1] = newTile;
+    _drawTileCacheCount = #_drawTileCache;
+end;
+
+---@param gap? integer [default = 128]
+---@param leftRightMargin? integer [default = 0]
+---@param topBottomMargin? integer [default = 0]
+---@return USGAPITileChunks chunks [cameraX/gap][cameraY/gap][]
+local optimizeTiles = function(gap, leftRightMargin, topBottomMargin)
+    gap = gap or 128;
+    leftRightMargin = leftRightMargin or 0;
+    topBottomMargin = topBottomMargin or 0;
+
+    ---@type USGAPITileChunks [cameraX/gap][cameraY/gap][]
+    local chunks = {};
+
+    for i = 1, _drawTileCacheCount do
+        local tile = _drawTileCache[i];
+        local x, y, w, h = tile.x, tile.y, tile.w, tile.h;
+
+        local leftChunk = floor((x - 480 + leftRightMargin) / gap);
+        local rightChunk = floor((x + w - leftRightMargin) / gap);
+        local topChunk = floor((y - 272 + topBottomMargin) / gap);
+        local bottomChunk = floor((y + h - topBottomMargin) / gap);
+
+        for xc = leftChunk, rightChunk do
+            if (not chunks[xc]) then
+                chunks[xc] = {};
+            end;
+            local xChunk = chunks[xc];
+
+            for yc = topChunk, bottomChunk do
+                if (not xChunk[yc]) then
+                    xChunk[yc] = {};
+                end;
+                local xyChunk = xChunk[yc];
+
+                xyChunk[#xyChunk + 1] = tile;
+            end;
+        end;
+    end;
+
+    _drawTileCacheChunks = chunks;
+    _drawTileCacheChunksGap = gap;
+
+    collectgarbage();
+    return chunks;
+end;
+
+
+local drawTiles = function()
+    local chunkX = _drawTileCacheChunks[floor(cameraX / _drawTileCacheChunksGap)];
+    if (not chunkX) then return; end;
+    local chunk = chunkX[floor(cameraY / _drawTileCacheChunksGap)];
+    if (not chunk) then return; end;
+
+    for i = 1, #chunk do
+        local tile = chunk[i];
+        local x, y = tile.x - cameraX, tile.y - cameraY;
+        if (x < 480 and y < 272) then
+            local w, h = tile.w, tile.h;
+            if (x + w > 0 and y + h > 0) then
+                _texDraw(tile.tex, x, y, w, h, nil,
+                    tile.srcX, tile.srcY, w, h, 0, 255, 0, false, true);
+                -- drawRect(x, y, w, h, Color.new(255, 0, 0, 128));
+            end;
+        end;
+    end;
+end;
+
+local clearAllTiles = function()
+    _drawTileCache = {};
+    _drawTileCacheCount = 0;
+    _drawTileCacheChunks = {};
+end;
+
+---@return integer
+local getTilesCount = function()
+    return _drawTileCacheCount;
 end;
 --#endregion
 
@@ -468,6 +604,7 @@ end;
 local unloadAll = function()
     unloadAllTextures();
     unloadAllSounds();
+    clearAllTiles();
 end;
 --#endregion
 
@@ -484,6 +621,12 @@ _USGAPI_CACHE = {
     drawCircle = drawCircle,
     drawRect = drawRect,
     fillRect = fillRect,
+
+    addTile = addTile,
+    clearAllTiles = clearAllTiles,
+    drawTiles = drawTiles,
+    optimizeTiles = optimizeTiles,
+    getTilesCount = getTilesCount,
 
     drawText = drawText,
     -- drawTextCenter = drawTextCenter,
