@@ -1,4 +1,4 @@
 ---@alias UIGame { path:string, name: string, icon: string }
 ---@alias UIGameGroup { name: string, games: UIGame[] }
 ---@alias UIGameMeta { category?: UIGameCategoryNames, altName?: string, author?: string, createdWithAI?: boolean }
----@alias UIGameCategoryNames "Classic" | "Parody" | string | "Unknown"
+---@alias UIGameCategoryNames "Classic" | "Parody" | "Sample" | string | "Unknown"
