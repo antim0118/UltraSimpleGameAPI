@@ -73,6 +73,19 @@ while true do
 end;
 ```
 
+## Предзагрузка текстур/звуков/шрифтов
+
+Для предзагрузки есть два способа:
+
+```lua
+-- передать пути к ассетам подряд через запятую
+USGAPI.preload("Images/Tex_64.jpg", "Images/Tex_256.jpg", "Fonts/arial.ttf", "Sounds/startGame.wav");
+
+-- передать пути к ассетам таблицей
+local preloadList = { "Images/Tex_64.jpg", "Images/Tex_256.jpg", "Fonts/arial.ttf", "Sounds/startGame.wav" };
+USGAPI.preload(preloadList);
+```
+
 ## Как работать с нейронкой
 
 Кидаете в нейронку файл [LLM_Prompt_USGAPI_RU.txt](https://raw.githubusercontent.com/antim0118/UltraSimpleGameAPI/refs/heads/main/LLM_Prompt_USGAPI_RU.txt) (где-то можно прям ссылку указать) и пишете ей что-то по типу:
