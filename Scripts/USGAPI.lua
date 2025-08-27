@@ -584,14 +584,14 @@ local unloadAllTextures = function()
     _drawTextureCache = {};
 end;
 
--- ---Unloads all fonts
--- local unloadAllFonts = function()
---     local unload = intraFont.un;
---     for k, v in pairs(_drawTextureCache) do
---         unload(v);
---     end;
---     _drawTextureCache = {};
--- end;
+---Unloads all fonts
+local unloadAllFonts = function()
+    local unload = intraFont.unload;
+    for k, v in pairs(_drawTextCache) do
+        unload(v);
+    end;
+    _drawTextCache = {};
+end;
 
 local unloadAllSounds = function()
     for path, channel in pairs(_playSoundCache) do
@@ -607,6 +607,7 @@ end;
 local unloadAll = function()
     unloadAllTextures();
     unloadAllSounds();
+    unloadAllFonts();
     clearAllTiles();
 end;
 --#endregion
@@ -647,6 +648,7 @@ _USGAPI_CACHE = {
 
     unloadAllTextures = unloadAllTextures,
     unloadAllSounds = unloadAllSounds,
+    unloadAllFonts = unloadAllFonts,
     unloadAll = unloadAll
 };
 
