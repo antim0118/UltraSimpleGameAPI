@@ -49,7 +49,7 @@
 Если говорить про сам код, то вот кратко:
 
 ```lua
-local USGAPI = require("Scripts.USGAPI"); -- подключение библиотеки
+local USGAPI = require("Libs.USGAPI"); -- подключение библиотеки
 
 local gamePath = USGAPI.getGamePath();    -- получение пути к папке с игрой
 -- (важно: если вы вызовите во вложенной папке, например Games/YourGame/Scripts,

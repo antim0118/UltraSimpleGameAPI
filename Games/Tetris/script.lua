@@ -1,4 +1,4 @@
-local USGAPI = require("Scripts.USGAPI");
+local USGAPI = require("Libs.USGAPI");
 
 local buttonsPressed = buttons.pressed;
 local drawText = USGAPI.drawText;

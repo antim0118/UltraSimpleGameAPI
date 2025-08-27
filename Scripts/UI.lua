@@ -1,4 +1,4 @@
-local USGAPI = require('Scripts.USGAPI');
+local USGAPI = require('Libs.USGAPI');
 local GameList = require('Scripts.GameList');
 
 --#region shortcut variables

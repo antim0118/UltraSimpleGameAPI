@@ -1,4 +1,4 @@
-local USGAPI = require("Scripts.USGAPI");
+local USGAPI = require("Libs.USGAPI");
 
 -- Кеш путей и цветов
 local gamePath = USGAPI.getGamePath();

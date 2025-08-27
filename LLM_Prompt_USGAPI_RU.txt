@@ -5,7 +5,7 @@ LLM системное задание (скопируй целиком и под
 Требования окружения и ограничения:
 - Платформа: PSP (LuaPlayer), разрешение экрана 480x272, начало координат в левом верхнем углу.
 - Основной скрипт: один файл `script.lua` в папке с игрой (можно дополнительные файлы Lua по необходимости, но по умолчанию делай один).
-- Подключение библиотеки: `local USGAPI = require("Scripts.USGAPI");`
+- Подключение библиотеки: `local USGAPI = require("Libs.USGAPI");`
 - Игровой цикл: бесконечный `while true do ... end` с вызовом `USGAPI.startFrame()` В НАЧАЛЕ кадра.
 - НЕ вызывать напрямую функции экрана/звука/ввода, кроме `buttons.*` когда нужно. Рендер и звук — через USGAPI.
 - НЕ вызывать `screen.waitVblankStart()` — синхронизация уже внутри `USGAPI.startFrame()`.
@@ -69,7 +69,7 @@ LLM системное задание (скопируй целиком и под
 -- Глобальные: Fonts/arial.ttf, Images/background.png (пример)
 -- Локальные: <gamePath>player.png, <gamePath>collect.wav (пример)
 
-local USGAPI = require("Scripts.USGAPI");
+local USGAPI = require("Libs.USGAPI");
 
 -- Инициализация
 local gamePath = USGAPI.getGamePath();

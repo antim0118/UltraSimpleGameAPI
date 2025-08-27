@@ -1,7 +1,7 @@
 require('Utils.Load');
 require('Scripts.DebugTimers');
 require('Scripts.Tasks');
-local USGAPI = require('Scripts.USGAPI');
+local USGAPI = require('Libs.USGAPI');
 local UI = require('Scripts.UI');
 
 while true do

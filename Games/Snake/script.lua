@@ -2,7 +2,7 @@
 -- Глобальные: Fonts/arial.ttf
 -- Локальные (в папке игры): eat.wav, gameover.wav (по желанию)
 
-local USGAPI                  = require("Scripts.USGAPI");
+local USGAPI                  = require("Libs.USGAPI");
 
 -- Инициализация
 local gamePath                = USGAPI.getGamePath();

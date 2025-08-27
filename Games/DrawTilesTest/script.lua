@@ -1,4 +1,4 @@
-local USGAPI = require("Scripts.USGAPI");
+local USGAPI = require("Libs.USGAPI");
 local gamePath = USGAPI.getGamePath();
 
 --#region SHORTINGS

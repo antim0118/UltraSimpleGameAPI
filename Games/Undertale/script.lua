@@ -1,4 +1,4 @@
-local USGAPI = require("Scripts.USGAPI");
+local USGAPI = require("Libs.USGAPI");
 
 -- Получение пути к игре
 local gamePath = USGAPI.getGamePath();
