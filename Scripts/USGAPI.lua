@@ -18,6 +18,9 @@ local FONT_DEFAULT_SIZE = 16;
 --#region SHORTINGS
 local sf = string.format;
 local floor = math.floor;
+local icontains = table.icontains;
+local lower, sub = string.lower, string.sub;
+local type = type;
 --#endregion
 
 local _drawCalls = 0;
@@ -70,7 +73,6 @@ local _drawTextureCache = {};
 
 ---@param texturePath string Path to texture
 ---@return USGAPITexture
----@nodiscard
 local loadTexture = function(texturePath)
     local data = _texLoad(texturePath);
     local w, h = Image.W(data), Image.H(data);
@@ -387,6 +389,14 @@ local _fontPrint = intraFont.print;
 local _fontWidth = intraFont.textW; --некорректно работает или типа того хзхз
 
 ---@param fontPath string
+---@return intraFontInstance
+local loadFont = function(fontPath)
+    local font = _fontLoad(fontPath, FONT_DEFAULT_SIZE);
+    _drawTextCache[fontPath] = font;
+    return font;
+end;
+
+---@param fontPath string
 ---@param x number
 ---@param y number
 ---@param text string
@@ -395,10 +405,7 @@ local _fontWidth = intraFont.textW; --некорректно работает и
 ---@param useCameraPos? boolean
 local drawText = function(fontPath, x, y, text, color, fontScale, useCameraPos)
     local font = _drawTextCache[fontPath];
-    if (not font) then
-        font = _fontLoad(fontPath, FONT_DEFAULT_SIZE);
-        _drawTextCache[fontPath] = font;
-    end;
+    if (not font) then font = loadFont(fontPath); end;
 
     color = color or _white;
 
@@ -501,15 +508,20 @@ getFreeChannel = function(ext)
 end;
 
 ---@param path string
+---@return soundEnum|soundNumber
+local loadSound = function(path)
+    local ext = path:sub(#path - 2);
+    local channel = getFreeChannel(ext);
+    _soundLoad(path, channel, true);
+    _playSoundCache[path] = channel;
+    return channel;
+end;
+
+---@param path string
 ---@param volume? number (0-100)
 local playSound = function(path, volume)
     local channel = _playSoundCache[path];
-    if (not channel) then
-        local ext = path:sub(#path - 2);
-        channel = getFreeChannel(ext);
-        _soundLoad(path, channel, true);
-        _playSoundCache[path] = channel;
-    end;
+    if (not channel) then channel = loadSound(path); end;
 
     volume = volume or 100;
 
@@ -522,6 +534,54 @@ local stopSound = function(path)
     local channel = _playSoundCache[path];
     if (not channel) then return; end;
     _soundStop(channel);
+end;
+--#endregion
+
+--#region Preloader
+local PRELOAD_TEXTURE_FORMATS = { ".png", ".jpg", "jpeg", ".bmp" };
+local PRELOAD_SOUND_FORMATS = { ".wav", ".mp3", ".at3", ".ogg" };
+local PRELOAD_FONT_FORMATS = { ".pgf", ".ttf", ".otf" };
+
+---@param path string
+local preloadAsset = function(path)
+    local t = type(path);
+    if (t ~= "string") then return; end;
+
+    local len = #path;
+    if (len < 4) then return; end;
+
+    local ext = sub(lower(path), #path - 3);
+
+    if (icontains(PRELOAD_TEXTURE_FORMATS, ext)) then
+        if (not _drawTextureCache[path]) then
+            loadTexture(path);
+        end;
+    elseif (icontains(PRELOAD_SOUND_FORMATS, ext)) then
+        if (not _playSoundCache[path]) then
+            loadSound(path);
+        end;
+    elseif (icontains(PRELOAD_FONT_FORMATS, ext)) then
+        if (not _drawTextCache[path]) then
+            loadFont(path);
+        end;
+    else
+        print("[USGAPI] preload: unknown extension - ", ext);
+    end;
+end;
+
+---@param ... (string|string[])
+local preload = function(...)
+    for i = 1, #arg do
+        local v = arg[i];
+        local t = type(v);
+        if (t == "table") then
+            for i1 = 1, #v do
+                preloadAsset(v[i1]);
+            end;
+        else
+            preloadAsset(v);
+        end;
+    end;
 end;
 --#endregion
 
@@ -637,6 +697,8 @@ _USGAPI_CACHE = {
 
     playSound = playSound,
     stopSound = stopSound,
+
+    preload = preload,
 
     getGamePath = getGamePath,
     isEmulator = isEmulator,
