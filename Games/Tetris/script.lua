@@ -173,7 +173,8 @@ end;
 local function clearLines()
     local linesCleared = 0;
 
-    for y = BOARD_HEIGHT, 1, -1 do
+    local y = BOARD_HEIGHT;
+    while (y >= 1) do
         local fullLine = true;
         for x = 1, BOARD_WIDTH do
             if gameState.board[y][x] == 0 then
@@ -196,6 +197,7 @@ local function clearLines()
             linesCleared = linesCleared + 1;
             y = y + 1; -- Проверяем ту же позицию снова
         end;
+        y = y - 1;
     end;
 
     if linesCleared > 0 then
